@@ -1,0 +1,66 @@
+1. Base de datos NREL
+1.0.1 Coordenadas (tkintermap con modal)
+1.0.2 Año
+
+1.1 Método de evaluación
+1.1.1 Solar
+1.1.1.1 Tipo de Método solar
+1.1.1.1.1 Masters
+1.1.1.1.1.1 Parámetros de Panel (Poner valores por defecto)
+1.1.1.1.1.1.1 Rho (ρ)
+1.1.1.1.1.1.2 Ángulo de inclinación del Panel
+1.1.1.1.1.1.3 g (editar)
+1.1.1.1.1.1.4 TONC
+1.1.1.1.1.1.5 Pmax STC
+
+
+
+
+1.1.1.1.2 Tiwari
+1.1.1.1.2.1 Parámetros de Panel (Poner valores por defecto)
+1.1.1.1.2.1.1 Rho (ρ)
+1.1.1.1.2.1.2 Ángulo de inclinación del Panel
+1.1.1.1.2.1.3 g (editar)
+1.1.1.1.2.1.4 TONC
+1.1.1.1.2.1.5 Pmax STC
+
+1.1.2 Eólico
+1.1.2.1 Tipo de Método Eólico
+1.1.2.1.1 Método cronológico
+1.1.2.1.1.1 Tipo de Turbina (Nombre por defecto y aquí se carga excel)
+1.1.2.1.2 Método estadístico (Weibull)
+1.1.2.1.2.2 Tipo de Turbina (Nombre por defecto y aquí se carga excel)
+
+
+
+2. Base de datos Secretaría del Ambiente DMQ
+
+2.0 Escoger Archivo (Tener archivo por defecto)
+
+2.1 Método de evaluación
+2.1.1 Solar
+2.1.1.1 Tipo de Método Solar
+
+2.1.1.1.1 Masters
+2.1.1.1.1.1 Parámetros de Panel (Poner valores por defecto)
+2.1.1.1.1.1.1 Rho (ρ)
+2.1.1.1.1.1.2 Ángulo de inclinación del Panel
+2.1.1.1.1.1.3 g (editar)
+2.1.1.1.1.1.4 TONC
+2.1.1.1.1.1.5 Pmax STC
+
+2.1.1.1.2 Tiwari
+2.1.1.1.2.1 Parámetros de Panel (Poner valores por defecto)
+2.1.1.1.2.1.1 Rho (ρ)
+2.1.1.1.2.1.2 Ángulo de inclinación del Panel
+2.1.1.1.2.1.3 g (editar)
+2.1.1.1.2.1.4 TONC
+2.1.1.1.2.1.5 Pmax STC
+
+
+2.1.2 Eólico
+2.1.2.1 Tipo de Método Eólico
+2.1.2.1.1 Método cronológico
+2.1.2.1.1.1 Tipo de Turbina (Nombre por defecto y aquí se carga excel)
+2.1.2.1.2 Método estadístico (Weibull)
+2.1.2.1.2.2 Tipo de Turbina (Nombre por defecto y aquí se carga excel)
