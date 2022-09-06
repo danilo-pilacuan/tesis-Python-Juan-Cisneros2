@@ -402,10 +402,14 @@ INTER_irrad, INTER_vel, INTER_direc, INTER_temp = INTER_independientes ()  # Val
 
 
 def distribucion_temporal_solar():
-    
+    print
     plt.figure()
+    print("?????????????????????????????????????????")
+    print("self.INTER_irrad")
+    print(BDD_irad)
+    
     BDD_irad.plot(linewidth=0.7)
-    plt.title('Distribución Temporal "IRRADIANCIA"', fontsize=15)
+    plt.title('Distribución Temporal "IRRADIA777CIA"', fontsize=15)
     plt.ylabel('Irradiancia [W/m^2]', fontsize=16)
     plt.show()
       
