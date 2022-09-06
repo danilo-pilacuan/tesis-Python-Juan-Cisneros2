@@ -54,7 +54,7 @@ attributes = 'ghi,dhi,wind_speed,air_temperature,wind_direction,relative_humidit
   # Establece el año bisiesto como verdadero o falso. True devolverá los datos de los días bisiestos si están presentes, false no.
 leap_year = 'false'
   # Establezca el intervalo de tiempo en minutos, es decir, "30" es un intervalo de media hora. Los intervalos válidos son 30 y 60.
-interval = '60'
+interval = '30'
   # Especifique el Tiempo Universal Coordinado (UTC), 'true' utilizará el UTC, 'false' utilizará la zona horaria local de los datos.
   # NOTA: Para utilizar los datos de la NSRDB en SAM, debe especificar UTC como "falso". SAM requiere que los datos estén en la zona horaria local.
 utc = 'false'
@@ -69,35 +69,21 @@ your_email = 'juan.cisneros@epn.edu.ec'
   # Únase a nuestra lista de correo para que podamos mantenerle al día de las novedades.
 mailing_list = 'true'
 
-  # Declarar la cadena url
-#url = 'https://developer.nrel.gov/api/solar/nsrdb_psm3_download.csv?wkt=POINT({lon}%20{lat})&names={year}&leap_day={leap}&interval={interval}&utc={utc}&full_name={name}&email={email}&affiliation={affiliation}&mailing_list={mailing_list}&reason={reason}&api_key={api}&attributes={attr}'.format(year=year, lat=lat, lon=lon, leap=leap_year, interval=interval, utc=utc, name=your_name, email=your_email, mailing_list=mailing_list, affiliation=your_affiliation, reason=reason_for_use, api=api_key, attr=attributes)
-#esta vale
-#url = 'https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?wkt=POINT({lon}%20{lat})&names={year}&leap_day={leap}&interval={interval}&utc={utc}&full_name={name}&email={email}&affiliation={affiliation}&mailing_list={mailing_list}&reason={reason}&api_key={api}&attributes={attr}'.format(year=year, lat=lat, lon=lon, leap=leap_year, interval=interval, utc=utc, name=your_name, email=your_email, mailing_list=mailing_list, affiliation=your_affiliation, reason=reason_for_use, api=api_key, attr=attributes)
-#editada
-#url = 'https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?wkt=POINT(lon%20lat)&names=year&leap_day=leap&interval=interval&utc=utc&full_name=name&email=email&affiliation=affiliation&mailing_list=mailing_list&reason=reason&api_key=api&attributes=attr'#.format(year=year, lat=lat, lon=lon, leap=leap_year, interval=interval, utc=utc, name=your_name, email=your_email, mailing_list=mailing_list, affiliation=your_affiliation, reason=reason_for_use, api=api_key, attr=attributes)
 
-#url = 'https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?api_key=WT0MS4JUkh59reR6YxisV0WpybhCyfjhzTrGexNO&full_name=Sample+User&email=user@company.com&affiliation=Test+Organization&reason=Example&mailing_list=true&wkt=POINT(-108.5449+10.5137)&names=2019&attributes=dhi,dni,ghi,clearsky_dhi,clearsky_dni,clearsky_ghi,cloud_type,dew_point,air_temperature,surface_pressure,relative_humidity,solar_zenith_angle,total_precipitable_water,wind_direction,wind_speed,fill_flag&leap_day=false&utc=false&interval=30'
-# este enlace valia
-url = 'https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?api_key=WT0MS4JUkh59reR6YxisV0WpybhCyfjhzTrGexNO&full_name=Sample+User&email=user@company.com&affiliation=Test+Organization&reason=Example&mailing_list=true&wkt=POINT({lon}+{lat})&names={year}&attributes=dhi,dni,ghi,clearsky_dhi,clearsky_dni,clearsky_ghi,cloud_type,dew_point,air_temperature,surface_pressure,relative_humidity,solar_zenith_angle,total_precipitable_water,wind_direction,wind_speed,fill_flag&leap_day=false&utc=false&interval=60'.format(year=year, lat=lat, lon=lon)
+url ='https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?api_key={key}&full_name={full_name}&email={email}&affiliation={affiliation}&reason={reason}&mailing_list=true&wkt=POINT({lng}+{lat})&names={names}&attributes=dhi,dni,ghi,clearsky_dhi,clearsky_dni,clearsky_ghi,cloud_type,dew_point,air_temperature,surface_pressure,relative_humidity,solar_zenith_angle,total_precipitable_water,wind_direction,wind_speed,fill_flag&leap_day=false&utc=false&interval=60'.format(key="WT0MS4JUkh59reR6YxisV0WpybhCyfjhzTrGexNO",full_name="Juan+Cisneros",email="juan.cisneros@epn.edu.ec",affiliation="National+Polytechnic+School",reason="Thesis+research",lat="-108.5449",lng="10.5137",names="2019")
 
-
+print(url)
 
 # Devuelve sólo las 2 primeras líneas para obtener los metadatos:
-info = pd.read_csv(url, nrows=1)
+info = pd.read_csv(url, skiprows=2)
   # Ver los metadatos de las propiedades especificadas, por ejemplo, la zona horaria y la elevación
-timezone, elevation = info['Local Time Zone'], info['Elevation']
+#timezone, elevation = info['Local Time Zone'], info['Elevation']
 # Ver metadatos.... PARA VER LA DATA SOLAMENTE SE PUEDE OMITIR.... OJO
 #info
 
 
-# Devuelve todas las líneas del csv menos las 2 primeras para obtener los datos:
-#df = pd.read_csv('http://developer.nrel.gov/api/solar/nsrdb_psm3_download.csv?wkt=POINT({lon}%20{lat})&names={year}&leap_day={leap}&interval={interval}&utc={utc}&full_name={name}&email={email}&affiliation={affiliation}&mailing_list={mailing_list}&reason={reason}&api_key={api}&attributes={attr}'.format(year=year, lat=lat, lon=lon, leap=leap_year, interval=interval, utc=utc, name=your_name, email=your_email, mailing_list=mailing_list, affiliation=your_affiliation, reason=reason_for_use, api=api_key, attr=attributes), skiprows=2)
-
-# editado si funciona
-#df = pd.read_csv('https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?api_key=WT0MS4JUkh59reR6YxisV0WpybhCyfjhzTrGexNO&full_name=Sample+User&email=user@company.com&affiliation=Test+Organization&reason=Example&mailing_list=true&wkt=POINT(-108.5449+10.5137)&names=2019&attributes=dhi,dni,ghi,clearsky_dhi,clearsky_dni,clearsky_ghi,cloud_type,dew_point,air_temperature,surface_pressure,relative_humidity,solar_zenith_angle,total_precipitable_water,wind_direction,wind_speed,fill_flag&leap_day=false&utc=false&interval=30'.format(year=year, lat=lat, lon=lon, leap=leap_year, interval=interval, utc=utc, name=your_name, email=your_email, mailing_list=mailing_list, affiliation=your_affiliation, reason=reason_for_use, api=api_key, attr=attributes), skiprows=2)
-
 # enlace de prueva
-df = pd.read_csv('https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?api_key=WT0MS4JUkh59reR6YxisV0WpybhCyfjhzTrGexNO&full_name=Sample+User&email=user@company.com&affiliation=Test+Organization&reason=Example&mailing_list=true&wkt=POINT({lon}+{lat})&names={year}&attributes=dhi,dni,ghi,clearsky_dhi,clearsky_dni,clearsky_ghi,cloud_type,dew_point,air_temperature,surface_pressure,relative_humidity,solar_zenith_angle,total_precipitable_water,wind_direction,wind_speed,fill_flag&leap_day=false&utc=false&interval=60'.format(year=year, lat=lat, lon=lon), skiprows=2)
+df = pd.read_csv('https://developer.nrel.gov/api/nsrdb/v2/solar/psm3-download.csv?api_key=WT0MS4JUkh59reR6YxisV0WpybhCyfjhzTrGexNO&full_name=Sample+User&email=user@company.com&affiliation=Test+Organization&reason=Example&mailing_list=true&wkt=POINT({lon}+{lat})&names={year}&attributes=dhi,dni,ghi,clearsky_dhi,clearsky_dni,clearsky_ghi,cloud_type,dew_point,air_temperature,surface_pressure,relative_humidity,solar_zenith_angle,total_precipitable_water,wind_direction,wind_speed,fill_flag&leap_day=false&utc=false&interval=30'.format(year=year, lat=lat, lon=lon), skiprows=2)
 
 
   # Set the time index in the pandas dataframe: (Establece el índice de tiempo en el marco de datos de pandas:)
@@ -105,7 +91,6 @@ df = df.set_index(pd.date_range('1/1/{yr}'.format(yr=year), freq=interval+'Min',
 
   # ver la forma del DataFrame
 print ('shape:'),df.shape
-print(df)
 df.head()
 #Imprimir los nombres de las columnas
 print (df.columns.values)
