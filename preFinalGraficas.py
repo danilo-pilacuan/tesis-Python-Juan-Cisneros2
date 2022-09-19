@@ -7,6 +7,7 @@ Created on Fri Sep 10 14:53:33 2021
 #  https://nsrdb.nrel.gov/   (PAGINA DE DESCARGAS DE NREL) BORRAR EL COMENTARIO
 #  http://www.quitoambiente.gob.ec/index.php/inicio   (Pagina secretaria del ambiente), entrar en RED DE MONITOREO ATMOSFÉRICO
 #  https://tuluzsolar.com/products/panel-solar-risen-450w-monocristalino-144-celulas , (FICHAS DE PANELES SOLARES)
+#  https://heliostrategiaecuador.com/paneles-solares-fv-2/       paneles solares en ecuador con fichas tecnicas
 
 import pandas as pd
 import tkinter as tk
@@ -24,12 +25,12 @@ from windrose import WindroseAxes
 import matplotlib.cm as cm
 
 #import scipy.stats as s
-
+from scipy.integrate import simps
 
 #import scipy.integrate as sci
 
 
-#import sympy as sp
+import sympy as sp
 
 
 #from scipy.integrate import quad
@@ -55,7 +56,7 @@ def f_masters():
     #ventana.withdraw()                                   #cierra la ventana principal
     V_masters=tk.Toplevel()                              #Abre la ventana secundaria
     V_masters.title('MÉTODO DE MASTERS')                 #titulo de la ventana
-    V_masters.geometry('600x300')                        #tamaño de la ventana 600x300
+    V_masters.geometry('600x300')                        #tamanio de la ventana 600x300
     V_masters.iconbitmap('BUHO_EPN_big.ico')             #ingreso del icono en la ventana
     
     mi_menu_master=tk.Menu(V_masters)                    #creacion de menu en la subventana con una nueva variable 'mi_menu_master'
@@ -79,20 +80,20 @@ def f_tiwari():
     #ventana.withdraw()                           #cierra la ventana principal
     V_tiwari=tk.Toplevel()                       #Abre la ventana secundaria
     V_tiwari.title('MÉTODO DE TIWARI')           #titulo de la ventana
-    V_tiwari.geometry('600x300')                 #tamaño de la ventana 600x300
+    V_tiwari.geometry('600x300')                 #tamanio de la ventana 600x300
     V_tiwari.iconbitmap('BUHO_EPN_big.ico')      #ingreso del icono en la ventana
     
 def f_cronologico():
     #ventana.withdraw()                           #cierra la ventana principal
     V_cronologico=tk.Toplevel()                  #Abre la ventana secundaria
     V_cronologico.title('MÉTODO CRONOLÓGICO')    #titulo de la ventana
-    V_cronologico.geometry('600x300')            #tamaño de la ventana 600x300
+    V_cronologico.geometry('600x300')            #tamanio de la ventana 600x300
     V_cronologico.iconbitmap('BUHO_EPN_big.ico') #ingreso del icono en la ventana
     #-----------------------Imagen de fonde pantalla------------------------
     
     #V_cronologico.config(menu=mi_menu_master)
     #-----------------------------crear botones-----------------------------
-    fondo_eolico_cron = ImageTk.PhotoImage(Image.open ('energía-Eolica-1.jpg'))  # Abre la imagen de fondo de pantalla, es igual al metodo anterior  fondo_eolico_cron = ImageTk.PhotoImage(Image.open ('energía-Eolica-1.jpg').resize((600, 300)))  cuando necesito definir el tamaño de la imagen
+    fondo_eolico_cron = ImageTk.PhotoImage(Image.open ('energía-Eolica-1.jpg'))  # Abre la imagen de fondo de pantalla, es igual al metodo anterior  fondo_eolico_cron = ImageTk.PhotoImage(Image.open ('energía-Eolica-1.jpg').resize((600, 300)))  cuando necesito definir el tamanio de la imagen
     fondo_cron1 = Label(V_cronologico, image=fondo_eolico_cron)
     fondo_cron1.image = fondo_eolico_cron                        # ojo realizar la igualacion para la visualizacion del fondo en ventana secundaria
     
@@ -118,7 +119,7 @@ def f_cronologico():
     #-----------Aplico en metodo de frame en ventana actual-----------------
     #Frame1_cronologico = Frame(V_cronologico, bg='blue')  # creo en frame interno para llevar la grafic a Tk
     #Frame1_cronologico.pack(expand=True, fill='both')     # defino que el frame se expanda a ambos lados si se estira la ventana
-    #Frame1_cronologico.config(width='700', height='400')  # defino el tamaño del frame
+    #Frame1_cronologico.config(width='700', height='400')  # defino el tamanio del frame
     
     
 
@@ -126,12 +127,12 @@ def f_estadistico():
     #ventana.withdraw()                           #cierra la ventana principal
     V_estadistico=tk.Toplevel()                  #Abre la ventana secundaria
     V_estadistico.title('MÉTODO ESTADÍSTICO')    #titulo de la ventana
-    V_estadistico.geometry('600x300')            #tamaño de la ventana 600x300
+    V_estadistico.geometry('600x300')            #tamanio de la ventana 600x300
     V_estadistico.iconbitmap('BUHO_EPN_big.ico') #ingreso del icono en la ventana
 
 #-------------------funciones para CURVAS DE AEROGENERADORES-----------------
 def curva_Goldwind (filename):
-    Goldwind = pd.read_excel('GoldWind GW70-1500.xlsx', sheet_name='Hoja1')
+    Goldwind = pd.read_excel('Vestas V126-3.45.xlsx', sheet_name='Hoja1')
     vel_goldwind = Goldwind['Velocidad(m/s)'].values            # adquiere los valores de la velocidad de la hoja excel, en tipo Array
     pot_goldwind = Goldwind['Potencia(kW)'].values              # adquiere los valores de la potencia de la hoja excel, en tipo Array
     t, c, k = splrep(vel_goldwind, pot_goldwind, s=0, k=3)      # k=3 usa spline de ecuacion cubica
@@ -147,7 +148,7 @@ def curva_Goldwind (filename):
     
     return spline, gold_filt, vel_arranque, vel_parada
 
-filename= 'GoldWind GW70-1500.xlsx'               # Nombre del archivo a ser leido
+filename= 'Vestas V126-3.45.xlsx'               # Nombre del archivo a ser leido
 spline, gold_filt, vel_arranque, vel_parada = curva_Goldwind(filename)                 # Valores que retorna la funcion
 
 
@@ -195,14 +196,14 @@ def lectura_datos (archivo_csv):
     base_datos.drop(['index'],axis=1,inplace=True)      # elimina el anterior indice y lo guarda en el mismo DataFrame
     #--------------Creacion de fecha con datetime------------------
     base_datos['Fecha']=pd.to_datetime(dict(year=base_datos['Year'],month=base_datos['Month'],day=base_datos['Day'], hour=base_datos['Hour'], minute=base_datos['Minute']))
-                                                        # Se ha creado una nueva columna tipo datetime de nombre 'Fecha',extrayendo la informacion de las columnas de la base de datos tanto de los meses, dias, año, horas y minutos
+                                                        # Se ha creado una nueva columna tipo datetime de nombre 'Fecha',extrayendo la informacion de las columnas de la base de datos tanto de los meses, dias, anio, horas y minutos
     base_datos=base_datos.set_index('Fecha')            # Se fija la fecha como indice (index)
     bdd=base_datos.drop(['Year','Month','Day','Hour','Minute'],axis=1)  # elimina las columnas no deseadas de la nueva base de datos
     bdd_float=bdd.replace('[^\d.]', '', regex= True).astype(float)      # se convierte los valores del DataFrame de tipo object a type float, para realizar los promedios
     
     return Hexc, Longitudes, bdd_float, L                   # Valores que retorna la funcion
 
-archivo_csv='NREL Villonaco 2019.csv'                         # nombre del archivo a ser leido
+archivo_csv='NREL Villonaco 2018_2.csv'                         # nombre del archivo a ser leido
 Hexc, Longitudes, bdd_float, L = lectura_datos(archivo_csv) # Valores que retorna la funcion
 
 #-----------------seno, coseno y tangente de L (latitud)---------------------
@@ -210,7 +211,7 @@ cos_L=math.cos(L* math.pi/180)                           # se aplica la formula 
 sin_L=math.sin(L* math.pi/180)                           # se aplica la formula para calcular seno de latitud
 tan_L=math.tan(L* math.pi/180)                           # se aplica la formula para calcular tangente de latitud
 #----------------declaro el angulo de inclinacion del panel------------------
-E=25                                                     # Tanto para Masters como para Tiwari
+E = 20                                                     # Tanto para Masters como para Tiwari
 cos_E=math.cos(E* math.pi/180)                           # se aplica la formula para calcular coseno de inclinacion de panel
 sin_E=math.sin(E* math.pi/180) 
 L_E=L-E  
@@ -221,6 +222,7 @@ sin_LE= math.sin(L_E*math.pi/180)                        # se aplica la formula 
 Rd = (1+cos_E)/2                                         # Factor de conversion de radiacion difusa Rd
 Rr = (1-cos_E)/2                                         # Factor de conversion de radiacion reflejada Rr
 Ro = 0.2                                                 # Coeficiente de reflexion para suelo ordinario  
+
 #--------------------DEFINICION DE ORIENTACION DEL PANEL---------------------
 if L > 0:                                                # Condicion para escoger el ángulo acimut de orientacion del panel (PARA TIWARI)
     GAMA =  0                                            # si el panel esta en el hemisferio norte
@@ -240,7 +242,7 @@ def fechas_horas (bdd_float):
     #f_fin=fechas[-1]                                    # adquiere la fecha en la que finalizo la toma de datos variable type TimeStamp
     #----se extrae el numero de dia "n" para las formulas de declinacion----
     f=fechas.to_frame()                                  # Se crea una variable que contenga las fechas de la base de datos pero en formato DataFrame  
-    f['n_dia'] = f.Fecha.dt.strftime('%j')               # Se cre una columna con nombre n_dia que adquiere el numero de dia del año de la columna Fecha, a traves de (.dt.strftime('%j'))
+    f['n_dia'] = f.Fecha.dt.strftime('%j')               # Se cre una columna con nombre n_dia que adquiere el numero de dia del anio de la columna Fecha, a traves de (.dt.strftime('%j'))
     f['N hora'] = f.Fecha.dt.strftime('%H')              # Se cre una columna con nombre hora que adquiere el numero de horas del dia de la columna Fecha, a traves de (.dt.strftime('%H'))
     f['N minutos'] = f.Fecha.dt.strftime('%M')           # Se cre una columna con nombre minutos que adquiere los minutos del dia de la columna Fecha, a traves de (.dt.strftime('%M'))
     #-----------------------------HORAS DEL DIA-----------------------------
@@ -355,9 +357,41 @@ def angulos (n):
     #---------FACTORES DE CONVERSION SOBRE UNA SUPERFICIE INCLINADA---------
     ang_concat['Rb'] = (cos_LE*ang_concat['coseno (δ°)']*ang_concat['seno (H_SRC)'] + ang_concat['H_SRC min']*sin_LE*ang_concat['seno (δ°)'])/(cos_L*ang_concat['coseno (δ°)']*ang_concat['seno (H_SR)'] + ang_concat['H_SR (Radianes)']*sin_L*ang_concat['seno (δ°)']) # Factor de conversion de radiacion de haz Rb
     
-    return ang, ang_concat, cos_d, sin_d, cos_H, sin_H, co_H, bet, aci, BETA, sin_Hsr, num_dia, sin_Hsrc      # Valores que retorna la funcion
+    
+    return ang, ang_concat, cos_d, sin_d, cos_H, sin_H, co_H, bet, aci, BETA, sin_Hsr, num_dia, sin_Hsrc     # Valores que retorna la funcion
 ang, ang_concat, cos_d, sin_d, cos_H, sin_H, co_H, bet, aci, BETA, sin_Hsr, num_dia, sin_Hsrc = angulos(n)    # Valores que retorna la funcion
 
+#################______numero de dias del mes__________#########
+def numero_dias (num_dia):
+    prom_dias = num_dia.resample('M').mean()
+    fechas=prom_dias.index                                # adquiere todas las dechas del DataFrame bdd_float
+    q=fechas.to_frame()                                   # Se crea una variable que contenga las fechas de la base de datos pero en formato DataFrame  
+    q['dias'] = q.Fecha.dt.strftime('%d')                 # Se cre una columna con nombre n_dia que adquiere el numero de dia del anio de la columna Fecha, a traves de (.dt.strftime('%j'))
+    q=q.drop(['Fecha'],axis=1)                            # se elimina la columna Fecha 
+    col=['dias']                                          # se enlista el nombre de las nuevas columnas
+    q[col]=q[col].apply(pd.to_numeric, errors='coerce', axis=1) # se transforma a formato numerico las columnas que se introducen anteriormente
+    
+    return q
+q = numero_dias (num_dia) 
+
+
+def beta_promedio ():
+    
+    beta_m = ang_concat.filter(items=['coseno (δ°)','seno (H_SR)','H_SR (Radianes)','seno (δ°)'])
+    beta_m['prom(sin β°)'] = (cos_L*beta_m['coseno (δ°)']*beta_m['seno (H_SR)'] + beta_m['H_SR (Radianes)']*sin_L*beta_m['seno (δ°)']) # promedio de (seno  β°)
+    #---------------- Se calcula la altitud β (PROMEDIO)--------------------  
+    bet_prom = beta_m.filter(items=['prom(sin β°)'])                   # saca los valores de la columna a ser calculada posteriormente
+    bet_prom[bet_prom > 1] = 1  
+    
+    beta_H_prom = lambda bet_prom : math.asin(bet_prom)                # se aplica la formula para calcular seno de β
+    B_H_prom = bet_prom['prom(sin β°)'].apply(beta_H_prom).to_frame()    # la formula devuelve un tipo series, por lo tanto se transforma a frame
+    B_H_prom.columns = ['Prom (β°)']                                   # se cambia el nombre de la columna
+    B_H_prom['Prom (β°)'] = B_H_prom['Prom (β°)']* 180/math.pi         # se transforma a grados el angulo β
+    beta_m = pd.concat([beta_m, B_H_prom], axis=1)                     # se concatena la nueva columna calculada al dataframe anterior
+    
+    return beta_m, bet_prom
+
+beta_m, bet_prom = beta_promedio () 
 
 #---------------INTERPOLACION Y FILTRADO de BASE DE DATOS------------------
                                                             # SE rellena los datos faltante Nan con el methodo de interpolacion (akima)
@@ -398,18 +432,16 @@ INTER_irrad, INTER_vel, INTER_direc, INTER_temp = INTER_independientes ()  # Val
 
 
 #---------------EJEMPLO DE GRAFICA DE DATOS DIARIOS-------------------------
-# no_spline=BDD_irad.plot().set_title('BDD irrad, no aumenta periodos')
-
+'''
+no_spline=BDD_irad.plot(linewidth=0.7).set_title('Distribución Temporal "IRRADIANCIA"')
+plt.ylabel('Irradiancia [W/m^2]', fontsize=16)
+'''
 
 def distribucion_temporal_solar():
-    print
-    plt.figure()
-    print("?????????????????????????????????????????")
-    print("self.INTER_irrad")
-    print(BDD_irad)
     
+    plt.figure()
     BDD_irad.plot(linewidth=0.7)
-    plt.title('Distribución Temporal "IRRADIA777CIA"', fontsize=15)
+    plt.title('Distribución Temporal "IRRADIANCIA"', fontsize=15)
     plt.ylabel('Irradiancia [W/m^2]', fontsize=16)
     plt.show()
       
@@ -504,61 +536,56 @@ INTER_spl_irrad, INTER_spl_vel, INTER_spl_temp  = spl_de_INTER (INTER_irrad, INT
 def Potencia(Tamb , Ex): # Tamb:[C] ; Ex:[W/m2]
 
     
-    TONC = 47.5 # C        ## da el fabricante
-    T_cell = Tamb +(TONC-20)*(Ex/800)
-    g = -0.463 # %/C       ## da el fabricante
-    Pmax_STC = 250 # Wp    ## da el fabricante
+    TONC = 47.5                                                 # da el fabricante [°C]
+    T_cell = Tamb +(TONC-20)*(Ex/800)                           # calculo te la temp. del panel
+    g = -0.463 # %/C                                            # da el fabricante  (coeficiente de temperatura de potencia maxima)
+    Pmax_STC = 250                                              # da el fabricante [Wp]
     Pmax_T_cell_bdd = Pmax_STC*(1+(g/100)*(T_cell-25))*(Ex/1000)
     
     
-    return Pmax_T_cell_bdd                          # Valores que retorna la funcion
+    return Pmax_T_cell_bdd                                      # Valores que retorna la funcion
 
-
+'''
 #---------------------POTENCIA PARA BDD------------------------------
 potenc_bdd = BDD_temp.Temperature.astype(object).combine(BDD_irad.GHI , func = Potencia)
 potenc_bdd = potenc_bdd.to_frame()
 potenc_bdd.columns = ['Energia [Wh]']                                 # cambio el nombre de la columna
 ener_panel_bdd = potenc_bdd.resample('D').apply(integrate.trapz, dx=1/2)  #realiza la integracion diaria de la energia  ;  dx=1/2 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 30T, se debe especificar que la hora la dividimos en 2 partes de 30 minutos
-suma_BDD = ener_panel_bdd.sum()
-
+#suma_BDD = ener_panel_bdd.sum()      # ES LO MISMO QUE ener_panel_bdd_anio
+ener_panel_bdd_mes = ener_panel_bdd.resample('M').sum()
+ener_panel_bdd_anio = ener_panel_bdd.resample('Y').sum()
+'''
 
 #---------------------POTENCIA PARA SPLINE------------------------------
-
+######################____SI___GRAFICAR__________#######################
 potenc_INTER_SPLINE = INTER_spl_temp .Temperatura.astype(object).combine(INTER_spl_irrad.GHI , func=Potencia)
 potenc_INTER_SPLINE = potenc_INTER_SPLINE.to_frame()
 potenc_INTER_SPLINE.columns = ['Energia [Wh]']                                 # cambio el nombre de la columna
 ener_panel_spl = potenc_INTER_SPLINE.resample('D').apply(integrate.trapz, dx=1/4) #realiza la integracion diaria de la energia;   dx=1/4 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 15T, se debe especificar que la hora la dividimos en 4 partes de 15 minutos
-suma_spline = ener_panel_spl.sum() 
-
-prom_mes_pot = ener_panel_spl.resample('M').mean()
-
-fig, ax = plt.subplots()
-prom_mes_pot.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
-ax.set_xticklabels([x.strftime('%Y-%m') for x in prom_mes_pot.index], rotation=90)
-plt.ylabel('Energía generada [Wh/m^2-dia]', fontsize=16)
-plt.xlabel('Fechas [meses]', fontsize=16)
-plt.title('METODO MASTERS: Energía SOLAR Generada promedio mensual')
-plt.show()
-
+ener_panel_spl['Energia [Wh]'] = ener_panel_spl['Energia [Wh]']/1000            # paso a kWh/m^2-dia   
+ener_panel_spl.columns=['Energia [kWh]']                                        # se cambia el nombre de la columna
+   
+#suma_spline = ener_panel_spl.sum()
+ener_suma_anio = ener_panel_spl.resample('Y').sum()                                             # Energia total producida en el anio
+ener_mes_horizont = ener_panel_spl.resample('M').sum()                          # Energía generada mensualmente para un panel horizontal
 
 #----------------------- Grafica hecha funcion-------------------------
 def graficas_energia_solar():
     
     fig, ax = plt.subplots()
-    prom_mes_pot.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
-    ax.set_xticklabels([x.strftime('%Y-%m') for x in prom_mes_pot.index], rotation=90)
-    plt.ylabel('Energía generada [Wh/m^2-dia]', fontsize=16)
+    ener_mes_horizont.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
+    ax.set_xticklabels([x.strftime('%Y-%m') for x in ener_mes_horizont.index], rotation=90)
+    plt.ylabel('Energía generada [kWh]', fontsize=16)
     plt.xlabel('Fechas [meses]', fontsize=16)
-    plt.title('MASTERS: Energía SOLAR Generada promedio mensual')
+    plt.title('Energía SOLAR Generada MENSUAL: sup. HORIZONTAL')
     plt.show()
     
     
 graficas_energia_solar()
 
-
 #----------------------------ERROR RELATIVO---------------------------
 
-error_solar = abs(((suma_BDD-suma_spline)/suma_BDD)*100)
+#error_solar = abs(((suma_BDD-suma_spline)/suma_BDD)*100)
 
 #-------------------Muestra la radiacion diaria-----------------------
 # -----esta funcion funciona pero no es equivalente a su reemplazo-----
@@ -566,23 +593,43 @@ error_solar = abs(((suma_BDD-suma_spline)/suma_BDD)*100)
 def periodo_valido (BDD_irad):
     
     #periodo_radiacion_filt=FILT_irrad.between_time('06:30','18:30') #Establezco el horario en que existen medidas de radiacion solar para sacar promedios diarios
-    periodo_radiacion_BDD = BDD_irad['GHI'] != 0           # selecciono los valores diferentes de cero para realizar el promedio diario de irradiacion solar sin importar la zona horaria devuelve valores bool (true, false)
-    periodo_rad_BDD = BDD_irad [periodo_radiacion_BDD]           # defino los valores diferentes de cero en las fechas correspondientes
+    periodo_radiacion_BDD = BDD_irad['GHI'] != 0                     # selecciono los valores diferentes de cero para realizar el promedio diario de irradiacion solar sin importar la zona horaria devuelve valores bool (true, false)
+    periodo_rad_BDD = BDD_irad [periodo_radiacion_BDD]               # defino los valores diferentes de cero en las fechas correspondientes
     
     return periodo_rad_BDD
 
 periodo_rad_BDD = periodo_valido (BDD_irad)
 '''
+'''
+B_hora_ang = ang_concat.filter(items=['Beta (β°)'])
+B_hora_ang[B_hora_ang < 0] = 0 
+B_hora_ang.columns=['Prom (β°)'] 
+B_dia_ang = B_hora_ang.resample('D').mean()
+B_mes_ang = B_hora_ang.resample('M').mean()
+'''
+############################## extrae beta(β°)#############################
+B_hora = beta_m.filter(items=['Prom (β°)'])
+B_dia = B_hora.resample('D').mean()
+B_mes = B_hora.resample('M').mean()
+############################ extrae coseno (δ°)############################
+cos_d_hora = ang_concat.filter(items=['coseno (δ°)'])
+cos_d_dia = cos_d_hora.resample('D').mean()
+cos_d_mes = cos_d_hora.resample('M').mean()
+############################ extrae coseno (δ°)############################
+d_hora = ang_concat.filter(items=['Declinación (δ°)'])
+d_dia = d_hora.resample('D').mean()
+d_mes = d_hora.resample('M').mean()
+
 #-------------------kT, IDH, por metodo de MASTERS-----------------------
 #-------------promedio de GHI para sacar kT (indice de claridad)---------
 def kt_bdd_masters ():
     
-    GHI_diario =BDD_irad.resample('D').apply(integrate.trapz, dx=1/2)  # Area bajo la curva de irradiacion, energia diaria de la irradiacion global ;   dx=1/2 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 30T, se debe especificar que la hora la dividimos en 2 partes de 30 minutos
+    GHI_diario = INTER_spl_irrad.resample('D').apply(integrate.trapz, dx=1/4)  # Area bajo la curva de irradiacion, energia diaria de la irradiacion global ;   dx=1/2 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 30T, se debe especificar que la hora la dividimos en 2 partes de 30 minutos
     GHI_diario['GHI'] = GHI_diario['GHI']/1000                         # paso a kWh/m^2-dia   
     GHI_diario.columns=['GHI kWh/m^2-dia']                             # se cambia el nombre de la columna
     
     Io_irad = ang_concat.filter(items=['Io (kWh/m^2)'])                # se filtra item Io, para promediar diariamente
-    Io_irad=Io_irad.resample('D').mean()                               # se promedia diariamente Io
+    Io_irad = Io_irad.resample('D').mean()                             # se promedia diariamente Io
     #------------------- METODO DE MASTERS, calculo de (kT)---------------
     kT_diario=pd.concat([GHI_diario, Io_irad], axis=1)                       # se concatena la nueva columna calculada al dataframe anterior
     kT_diario['kT'] = kT_diario['GHI kWh/m^2-dia']/kT_diario['Io (kWh/m^2)'] # se calcula el kT(indice de claridad diario)
@@ -595,27 +642,196 @@ def kt_bdd_masters ():
     #-----RADIACION SOLAR TOTAL "DIARIA" EN UNA SUPEFICIE INCLINADA-------
     kT_diario['IC'] = kT_diario['IBH']*kT_diario['Rb']+kT_diario['I_DH kWh/m^2-dia']*Rd+ Ro*kT_diario['GHI kWh/m^2-dia']*Rr
 
-    #------------------- promedio mensual de  GHI e Io--------------------
+    #----------------Angulos de conversion montura DOS EJES----------------
+    kT_diario = pd.concat([kT_diario, B_dia], axis=1)
+    kT_diario['90-β'] = 90-kT_diario['Prom (β°)'] 
+    B_2ejes_d = lambda cos_90_B_d : math.cos(cos_90_B_d* math.pi/180)  # se aplica la formula para calcular angulo H_SRC°
+    B_2E_d = kT_diario['90-β'].apply(B_2ejes_d).to_frame()             # la formula devuelve un tipo series, por lo tanto se transforma a frame
+    B_2E_d.columns = ['cos(90-β)']                                     # se cambia el nombre de la columna 
+    kT_diario=pd.concat([kT_diario, B_2E_d], axis=1)                   # se concatena todos los valores calculados
+     #----------------Angulos de conversion montura DOS EJES----------------
+    kT_diario['Rd_2Ejes'] = (1+kT_diario['cos(90-β)'])/2
+    kT_diario['Rr_2Ejes'] = (1-kT_diario['cos(90-β)'])/2
+    #kT_diario['IC_2ejes'] = kT_diario['IBH']*kT_diario['Rb']+kT_diario['I_DH kWh/m^2-dia']*kT_diario['Rd_2Ejes']+ Ro*kT_diario['GHI kWh/m^2-dia']*kT_diario['Rr_2Ejes']
+    kT_diario['IC_2ejes2'] = kT_diario['IBH']+kT_diario['I_DH kWh/m^2-dia']*kT_diario['Rd_2Ejes']+ Ro*kT_diario['GHI kWh/m^2-dia']*kT_diario['Rr_2Ejes']  
+    #------------------- promedio mensual de  GHI e Io----------------------
     kT_mensual=pd.concat([GHI_diario, Io_irad], axis=1)
     kT_mensual=kT_mensual.resample('M').mean()
     kT_mensual['kT'] = kT_mensual['GHI kWh/m^2-dia']/kT_mensual['Io (kWh/m^2)'] # se calcula el kT(indice de claridad mensual)
     kT_mensual['I_DH kWh/m^2-dia'] = kT_mensual['GHI kWh/m^2-dia']*(1.390-4.027*kT_mensual['kT']+5.531*kT_mensual['kT']**2-3.108*kT_mensual['kT']**3)  # calculo de irradiancia difusa horizontal MENSUAL
     kT_mensual['IBH']=kT_mensual['GHI kWh/m^2-dia'] - kT_mensual['I_DH kWh/m^2-dia'] 
     Rb_m_mensual = Rb_m.resample('M').mean() 
-    kT_mensual = pd.concat([kT_mensual, Rb_m_mensual], axis=1)                     # se concatena todos los valores calculados
+    kT_mensual = pd.concat([kT_mensual, Rb_m_mensual], axis=1)         # se concatena todos los valores calculados
     #--RADIACION SOLAR TOTAL "DIARIA mensual" EN UNA SUPEFICIE INCLINADA--
     kT_mensual['IC'] = kT_mensual['IBH']*kT_mensual['Rb']+kT_mensual['I_DH kWh/m^2-dia']*Rd+ Ro*kT_mensual['GHI kWh/m^2-dia']*Rr
-    
-    
+    #--------------IC "DIARIO mensual" EN  SEGUIDOR DE DOS EJES------------
+    kT_mensual = pd.concat([kT_mensual, B_mes], axis=1)
+    kT_mensual['90-β'] = 90-kT_mensual['Prom (β°)'] 
+    B_2ejes = lambda cos_90_B : math.cos(cos_90_B* math.pi/180)     # se aplica la formula para calcular angulo H_SRC°
+    B_2E = kT_mensual['90-β'].apply(B_2ejes).to_frame()             # la formula devuelve un tipo series, por lo tanto se transforma a frame
+    B_2E.columns = ['cos(90-β)']                                    # se cambia el nombre de la columna 
+    kT_mensual=pd.concat([kT_mensual, B_2E], axis=1)                # se concatena todos los valores calculados
+    #----------------Angulos de conversion montura DOS EJES----------------
+    kT_mensual['Rd_2Ejes'] = (1+kT_mensual['cos(90-β)'])/2
+    kT_mensual['Rr_2Ejes'] = (1-kT_mensual['cos(90-β)'])/2
+    kT_mensual['IC_2ejes'] = kT_mensual['IBH']+kT_mensual['I_DH kWh/m^2-dia']*kT_mensual['Rd_2Ejes']+ Ro*kT_mensual['GHI kWh/m^2-dia']*kT_mensual['Rr_2Ejes']
+
+    #--------------IC "DIARIO mensual"  SEGUIDOR DE 1 EJES-----------------
+    kT_mensual = pd.concat([kT_mensual, d_mes, cos_d_mes], axis=1)
+    kT_mensual['90-β+d'] = kT_mensual['90-β'] + kT_mensual['Declinación (δ°)']
+    B_1eje = lambda cos_90_B_d : math.cos(cos_90_B_d* math.pi/180)     # se aplica la formula para calcular angulo H_SRC°
+    B_1E = kT_mensual['90-β+d'].apply(B_1eje).to_frame()             # la formula devuelve un tipo series, por lo tanto se transforma a frame
+    B_1E.columns = ['cos(90-β+d)']                                    # se cambia el nombre de la columna 
+    kT_mensual=pd.concat([kT_mensual, B_1E], axis=1)                # se concatena todos los valores calculados
+    #----------------Angulos de conversion montura DOS EJES----------------
+    kT_mensual['Rd_1Eje'] = (1+kT_mensual['cos(90-β+d)'])/2
+    kT_mensual['Rr_1Eje'] = (1-kT_mensual['cos(90-β+d)'])/2
+    kT_mensual['IC_1eje'] = kT_mensual['IBH']*kT_mensual['coseno (δ°)']+kT_mensual['I_DH kWh/m^2-dia']*kT_mensual['Rd_1Eje']+ Ro*kT_mensual['GHI kWh/m^2-dia']*kT_mensual['Rr_1Eje']
+
     return GHI_diario, kT_diario, kT_mensual, Rb_m
 
 GHI_diario, kT_diario, kT_mensual, Rb_m  = kt_bdd_masters ()
 
+#___________________________IC colector______________________ no tiene sentido analizar energia promedio mensual.. eso ya esta sacado en la de superficie horizontal paso anterior
+def temp_promedio ():
+    prom_temp = pd.concat([INTER_spl_irrad, INTER_spl_temp], axis=1)
+    temp_sin_ceros = prom_temp['GHI'] != 0                                # filtro los valores diferentes de cero para escojer los valores de arranque (min) y de parada (max) 
+    temp_filt = prom_temp [temp_sin_ceros] 
+    temp_filt = temp_filt.filter(items=['Temperatura'])                   # defino los valores diferentes de cero en las fechas correspondientes
+    Temp_prom_dia = temp_filt.resample('D').mean()
+    Temp_prom_mes = temp_filt.resample('M').mean()
+    return Temp_prom_dia, Temp_prom_mes
+
+Temp_prom_dia, Temp_prom_mes = temp_promedio ()
+
+
+def ener_Ic ():
+    Ic_incli = kT_mensual.filter(items=['IC'])                 # filtro IC 
+    Ic_incli = Temp_prom_mes.Temperatura.astype(object).combine(Ic_incli.IC , func=Potencia)
+    Ic_incli = Ic_incli.to_frame()
+    Ic_incli.columns = ['Energia prom IC[kWh]']                # cambio el nombre de la columna
+    Ic_incli = pd.concat([Ic_incli,q], axis=1)                 # se concatena todos los valores calculados
+    Ic_incli['Energ_IC[kWh]'] = Ic_incli['Energia prom IC[kWh]']*Ic_incli['dias'] # se 
+    Ic_incli = Ic_incli.filter(items=['Energ_IC[kWh]'])
+
+    return Ic_incli
+
+Ic_incli = ener_Ic ()
+Energ_IC_anio = Ic_incli.resample('Y').sum()
+Energ_IC_mes = Ic_incli.resample('M').sum()
+
+
+def ener_Ic_1E ():
+    Ic_1E = kT_mensual.filter(items=['IC_1eje'])                  # filtro IC_1eje 
+    Ic_1E = Temp_prom_mes.Temperatura.astype(object).combine(Ic_1E.IC_1eje , func=Potencia)
+    Ic_1E = Ic_1E.to_frame()
+    Ic_1E.columns = ['Energia prom IC_1eje[kWh]']                 # cambio el nombre de la columna
+    Ic_1E = pd.concat([Ic_1E,q], axis=1)                          # se concatena todos los valores calculados
+    Ic_1E['Energ_IC_1E[kWh]'] = Ic_1E['Energia prom IC_1eje[kWh]']*Ic_1E['dias'] # se 
+    Ic_1E = Ic_1E.filter(items=['Energ_IC_1E[kWh]'])
+
+    return Ic_1E
+
+Ic_1E = ener_Ic_1E ()
+Energ_IC1E_anio = Ic_1E.resample('Y').sum() 
+Energ_IC1E_mes = Ic_1E.resample('M').sum()
+ 
+def ener_Ic_2E ():
+    Ic_2E = kT_mensual.filter(items=['IC_2ejes'])                  # filtro IC_2ejes 
+    Ic_2E = Temp_prom_mes.Temperatura.astype(object).combine(Ic_2E.IC_2ejes , func=Potencia)
+    Ic_2E = Ic_2E.to_frame()
+    Ic_2E.columns = ['Energia prom IC_2ejes[kWh]']                 # cambio el nombre de la columna
+    Ic_2E = pd.concat([Ic_2E,q], axis=1)                           # se concatena todos los valores calculados
+    Ic_2E['Energ_IC_2E[kWh]'] = Ic_2E['Energia prom IC_2ejes[kWh]']*Ic_2E['dias'] # se 
+    Ic_2E = Ic_2E.filter(items=['Energ_IC_2E[kWh]'])
+
+    return Ic_2E
+
+Ic_2E = ener_Ic_2E ()
+Energ_IC2E_anio = Ic_2E.resample('Y').sum() 
+Energ_IC2E_mes = Ic_2E.resample('M').sum()
+#-----------------------GRAFICAS DE LOS COLECTORES-------------------------
+def graficas_energia_IC ():
+    
+    fig, ax = plt.subplots()
+    Energ_IC_mes.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
+    ax.set_xticklabels([x.strftime('%Y-%m') for x in Energ_IC_mes.index], rotation=90)
+    plt.ylabel('Energía generada [kWh]', fontsize=16)
+    plt.xlabel('Fechas [meses]', fontsize=16)
+    plt.title('MÉTODO MASTERS: Energía SOLAR (SUPERFICIE INCLINADA)')
+    plt.show()
+    
+graficas_energia_IC ()
+
+def graficas_energia_IC_1E ():
+    
+    fig, ax = plt.subplots()
+    Energ_IC1E_mes.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
+    ax.set_xticklabels([x.strftime('%Y-%m') for x in Energ_IC1E_mes.index], rotation=90)
+    plt.ylabel('Energía generada [kWh]', fontsize=16)
+    plt.xlabel('Fechas [meses]', fontsize=16)
+    plt.title('MÉTODO MASTERS: Energía SOLAR (SEGUIDOR 1 EJE)')
+    plt.show()
+    
+graficas_energia_IC_1E ()
+
+def graficas_energia_IC_2E ():
+    
+    fig, ax = plt.subplots()
+    Energ_IC2E_mes.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
+    ax.set_xticklabels([x.strftime('%Y-%m') for x in Energ_IC2E_mes.index], rotation=90)
+    plt.ylabel('Energía generada [kWh]', fontsize=16)
+    plt.xlabel('Fechas [meses]', fontsize=16)
+    plt.title('MÉTODO MASTERS: Energía SOLAR (SEGUIDOR 2 EJES)')
+    plt.show()
+    
+graficas_energia_IC_2E ()
+
+########################## COMPARACION DE LAS ENERGIAS ##################
+energias_masters = pd.concat([ener_mes_horizont, Energ_IC_mes, Energ_IC1E_mes, Energ_IC2E_mes], axis=1)
+energias_masters.plot(linewidth=0.8).set_title('Comparación mensual de Energía (MÉTODO DE MASTERS)')
+plt.ylabel('Energía generada [kWh]', fontsize=12)
+    
+'''
+#------------KT HORARIO  TIWARI-------
+
+kt_horario2 = ang_concat.filter(items=['Aux_ndia','coseno (δ°)','coseno (H°)','seno (δ°)','Rb'])
+kt_horario2['Io2(W/m^2)'] = 1000*1.37*(1+0.034*kt_horario2['Aux_ndia'] )*(cos_L*kt_horario2['coseno (δ°)']*kt_horario2['coseno (H°)']+ sin_L*kt_horario2['seno (δ°)'] )   # se calcula el Io(kW/m^2)
+kt_horario2 = pd.concat([BDD_irad, kt_horario2], axis=1)  
+
+kt_horario2['kT'] = kt_horario2['GHI']/kt_horario2['Io2(W/m^2)'] # se calcula el kT(indice de claridad diario)
+
+
+kt_horario2['I_D1'] = kt_horario2['GHI']*(1-0.249*kt_horario2['kT'])
+kt_horario2['I_D2'] = kt_horario2['GHI']*(1.557-1.84*kt_horario2['kT'])
+kt_horario2['I_D3'] = kt_horario2['GHI']*0.177  
+#-------------IRRADIACION DIFUSA PARA DIFERENTES CONDICIONES-------------
+kt_horario2['I1'] = np.where(kt_horario2['kT']< 0.35 , kt_horario2['I_D1'], 0)                           # creacion de una columna 'I1' para rellenar con las condiciones de kT
+kt_horario2['I2'] = np.where((kt_horario2['kT']>0.35) & (kt_horario2['kT']<0.75), kt_horario2['I_D2'], 0) # creacion de una columna 'I2' para rellenar con las condiciones de kT
+kt_horario2['I3'] = np.where(kt_horario2['kT']>0.75 , kt_horario2['I_D3'], 0)  # creacion de una columna 'I3' para rellenar con las condiciones de kT
+kt_horario2['ID_Tiw'] = kt_horario2['I1']+kt_horario2['I2']+kt_horario2['I3']            # SE CREA LA COLUMNA (ID_Tiw) que representa la irradiacion difusa despues de pasar las condiciones kT
+    #-------------IRRADIACION de HAZ PARA DIFERENTES CONDICIONES-------------
+kt_horario2['IB_Tiw']=kt_horario2['GHI'] - kt_horario2['ID_Tiw']                              # se encuentra la irradiancia de haz directo en una superficie horizontal
+    #-------------ELIMINACION DE COLUMNAS DESPUES DE CONDICIONES-------------
+                 
+kt_horario2=kt_horario2.drop(['Aux_ndia','coseno (δ°)','coseno (H°)','seno (δ°)','I_D1','I_D2','I_D3','I1', 'I2', 'I3'],axis=1)    # elimina las columnas no deseadas de la nueva base de datos, (SE PUEDE COMENTAR ESTA LINEA no afecta)
+
+kt_horario2['IT_inclinada']=kt_horario2['IB_Tiw']*kt_horario2['Rb'] + kt_horario2['ID_Tiw']*Rd + kt_horario2['GHI']*Rr*Ro
+    
+#--------------ENERGIA EN PLANO INCLINADA_______________
+ener_panel_incli = BDD_temp.Temperature.astype(object).combine(kt_horario2.IT_inclinada , func = Potencia)
+ener_panel_incli = ener_panel_incli.to_frame()
+ener_panel_incli.columns = ['Energia [Wh]'] 
+ener_panel_incli = ener_panel_incli.resample('D').apply(integrate.trapz, dx=1/2)  #realiza la integracion diaria de la energia  ;  dx=1/2 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 30T, se debe especificar que la hora la dividimos en 2 partes de 30 minutos
+
+
+ener_suma_panel_incli =  ener_panel_incli.sum()                               # cambio el nombre de la columna
+
+prom_mes_4 = ener_panel_incli.resample('M').mean()
+'''
 
 
 
-
-   
 
 #-----------------------PARA LA BDD SPLINE-------------------------------
 
@@ -626,67 +842,41 @@ periodo_radiacion_filt=bdd_inter [colum_encabezados] != 0            #selecciono
 p_rad_filt=bdd_inter  [periodo_radiacion_filt]           #defino los valores diferentes de cero en las fechas correspondientes
 #prom_diario_filt=p_rad_filt.resample('d').mean()         #promedio diario de radiacion solar filtrada
 '''   
-#-----------------------PARA LA BDD EOLICA-------------------------------
-
-def poten_eolica_bdd (BDD_vel_v):
-    
-    pot_eo = spline(BDD_vel_v)                                          # saca los valores de potencia de las velocidaddes de viento
-    forma = pot_eo.shape[0]                                             # saca el numero de datos 
-    datos = pd.date_range(start=fecha_ini , periods=forma, freq='30T')  # saca las fechas y horas a una frecuencia de 30 minutos
-    p_eolica = pd.DataFrame(data=pot_eo, index=datos)                   # es el mismo df de (pot_eo), pero con los datos de intervalos(fechas)
-    
-    
-    return  p_eolica
-
-p_eolica = poten_eolica_bdd(BDD_vel_v)
-p_eolica.columns=['P eólica (W)']  
-p_eolica[p_eolica < 0.01] = 0
-area_eol_bdd=p_eolica.resample('D').apply(integrate.trapz, dx=1/2)   # Area bajo la curva de velocidad del viento, (energia diaria) ;   dx=1/2 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 30T, se debe especificar que la hora la dividimos en 2 partes de 30 minutos
-area_eol_bdd.columns=['E_eólica_Wh'] 
-
-area_eol_bdd_mes = area_eol_bdd.resample('M').mean()
-
-area_eol_bdd_año = area_eol_bdd.resample('Y').mean()
 
 
-''' 
-fechas_solar=area_eol_bdd.index                             # saca las fechas del indice
-f_eolic=fechas_solar.to_frame()                             # pasa a formato Frame las fechas del indice
-f_eolic.columns=['Fecha']                                   # se cambia el nombre de la columna
-
-pot_eolic=pd.concat([f_eolic, area_eol_bdd], axis=1)        # concatena las fecjas del indice con la potencia generada por el aerogenerador
 '''
-#index_fecha = pd.date_range(start=fecha_ini , periods=12)   # define los meses del año del indice 
-fig, ax = plt.subplots()
-area_eol_bdd_mes.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
-ax.set_xticklabels([x.strftime('%Y-%m') for x in area_eol_bdd_mes.index], rotation=90)
-plt.ylabel('Energía generada [Wh]', fontsize=16)
-plt.xlabel('Fechas [meses]', fontsize=16)
-plt.title('METODO: CRONOLÓGICO: Energía Eólica promedio mensual')
-plt.show()
+#--------------------------GRAFICA EOLICA CON PROMEDIO--------------------------
+area_eol_bdd_mes = area_eol_bdd.resample('M').mean()
+area_eol_bdd_anio = area_eol_bdd.resample('Y').mean()
 
+area_eol_bdd_mes.index = area_eol_bdd_mes.index.strftime('%Y-%m')
+area_eol_bdd_mes.plot.bar().set_title('METODO CRONOLÓGICO: Grafica Prom.mensual Energía eólica [Wh]')
+plt.ylabel('Energía [kWh/dia]', fontsize=15)
 
 
 #area_eol_bdd_mes['E_eólica_Wh'].plot.bar().set_title('Grafica mensual  de E_eólica_Wh')
-
 #area_eol_bdd.plot.bar().set_title('Grafica diaria  de E_eólica_Wh')    # Tambien grafica barras
-
+'''
      
-
+'''
 #---------------------Promedio de "DataFrame COMPLETO"-----------------------
-BDD_prom_diario=bdd_float.resample('d').mean()             #se saca promedio por dia de todo el DataFrame
-BDD_prom_mensual=bdd_float.resample('M').mean()            #se saca promedio por mes de todo el DataFrame
-BDD_prom_anual=bdd_float.resample('Y').mean()              #se saca promedio por año de todo el DataFrame
-
+#BDD_prom_diario=bdd_float.resample('d').mean()             #se saca promedio por dia de todo el DataFrame
+#BDD_prom_mensual=bdd_float.resample('M').mean()            #se saca promedio por mes de todo el DataFrame
+#BDD_prom_anual=bdd_float.resample('Y').mean()              #se saca promedio por anio de todo el DataFrame
 
 #------------------Promedio de "DataFrame por variables"---------------------
-
 prom_dia_DNI=BDD_prom_diario.filter(items=['GHI'])         #Escoje solamente la columna deseada, si quiero mas elementos uso (items=['DNI', 'Temperature', 'Presure', 'etc'])
+prom_dia_DNI.plot().set_title('Grafica de promedio diario GHI')
+
 prom_mes_DNI=BDD_prom_mensual.filter(items=['GHI'])
-
-#------------------------------DataFrame SOLAR-------------------------------
-
-df_solar=bdd_float.filter(items=['GHI','Temperature'])
+prom_mes_DNI.index = prom_mes_DNI.index.strftime('%Y-%m')
+prom_mes_DNI.plot.bar(color='g',edgecolor='black',  width=0.7, alpha=0.8).set_title('MÉTODO MASTERS: Gráfica promedio mensual GHI')
+plt.ylabel('[kWh]', fontsize=16)
+#plt.title('Ganancias en el 2020')
+#plt.xlabel('Mes del 2020')
+#plt.ylabel('Ganancias (en miles de pesos)')
+BDD_prom_mensual.plot().set_title('Promedio mensual de todas las variables')
+'''
 
 #-------------------------------GRAFICA SOLAR--------------------------------
 
@@ -694,42 +884,12 @@ df_solar=bdd_float.filter(items=['GHI','Temperature'])
 # GHI (Global Horizantal Irradiance)   TRABAJAR CON ESTA VARIABLE 'GHI' = es la SUMA DE LAS 3 RADIACIONES DIRECTA+ DIFUSA+ REFLEJADA 
 
 RADIACIONES = kT_diario.filter(items=['GHI kWh/m^2-dia', 'I_DH kWh/m^2-dia']) 
-
-
 RADIACIONES=RADIACIONES.T                                  #Se transpone el DataFrame para poder ingresar a la agrupacion de datos por mes
 solar_grupo_mes=RADIACIONES.groupby(pd.PeriodIndex(RADIACIONES.columns, freq='M'), axis=1).mean()   #se agrupa por mes mediante groupby la parte de..!  .sum() suma los valores de todo el mes
 df_grupo_mes=solar_grupo_mes.T                    # se vuelve a transponer para dar una mejor presentacion de los datos
-
-
 df_grupo_mes.plot.bar().set_title('RADIACION promedio mensual diario')
 plt.ylabel('Energía [kWh/m^2-dia]', fontsize=15)
 df_grupo_mes.plot().set_title('RADIACION promedio mensual diario')
-
-
-
-df_solar.plot().set_title('Grafica de todos los valores de df_solar GHI')
-prom_dia_DNI.plot().set_title('Grafica de promedio diario GHI')
-
-prom_mes_DNI.index = prom_mes_DNI.index.strftime('%Y-%m')
-prom_mes_DNI.plot.bar(color='g',edgecolor='black',  width=0.7, alpha=0.8).set_title('MÉTODO MASTERS: Gráfica promedio mensual GHI')
-plt.ylabel('[kWh]', fontsize=16)
-#plt.title('Ganancias en el 2020')
-#plt.xlabel('Mes del 2020')
-#plt.ylabel('Ganancias (en miles de pesos)')
-
-
-BDD_prom_mensual.plot().set_title('Promedio mensual de todas las variables')
-
-# ejemplo de plot:    opsd_dia['Consumption'].plot(linewidth=0.1)
-
-#--------------------------GRAFICA SOLAR con Spline--------------------------
-
-area_eol_bdd_mes.index = area_eol_bdd_mes.index.strftime('%Y-%m')
-area_eol_bdd_mes.plot.bar().set_title('METODO CRONOLÓGICO: Grafica Prom.mensual Energía eólica [Wh]')
-plt.ylabel('Energía [kWh/m^2-dia]', fontsize=15)
-
-#------------------------------DataFrame EÓLICO------------------------------
-#df_eolico=bdd_float.filter(items=['Wind Speed','Wind Direction','Pressure']) #se eliminan las columnas que no se utilizan para la evaluación eólica, y se adquiere un nuevo DataFrame
 
 
 #______________________________MÉTODO TIWARI_________________________________
@@ -856,36 +1016,93 @@ def kt_bdd_tiwari (GHI_diario, num_dia, kT_mensual):
     Rb_t = ang_tiwari.filter(items=['Rb'])                                   # se filtra item Rb, para promediar diariamente
     Rb_t = Rb_t.resample('D').mean()                                         # se promedia diariamente Rb
     kT_diario_t = pd.concat([kT_diario_t, Rb_t], axis=1)                     # se concatena todos los valores calculados
-    '''
     #-----RADIACION SOLAR TOTAL "DIARIA" EN UNA SUPEFICIE INCLINADA-------
-    kT_diario['IC'] = kT_diario['IBH']*kT_diario['Rb']+kT_diario['I_DH kWh/m^2-dia']*Rd+ Ro*kT_diario['GHI kWh/m^2-dia']*Rr
+    kT_diario_t['IC'] = kT_diario_t['IB_Tiw']*kT_diario_t['Rb']+kT_diario_t['ID_Tiw']*Rd+ Ro*kT_diario_t['GHI kWh/m^2-dia']*Rr
 
-    '''
-    
-    
-    
     #---------------------------- promedio diario----------------------------
-    num_dia_mensual = num_dia.resample('D').mean()                        # se extrae solamente el numero de dias del año
+    num_dia_mensual = num_dia.resample('D').mean()                        # se extrae solamente el numero de dias del anio
     kT_diario_t = pd.concat([kT_diario_t, num_dia_mensual], axis=1)       # se concatena la columna del numero de dias con el dataframe kT_diario_t
     #--------------------- promedio mensual de  GHI e Io---------------------
     H_promedio = kT_mensual.filter(items=['GHI kWh/m^2-dia'])             # filtro el H promedio calculado en el metodo anterior del dataFrame (kT_mensual)
     H_promedio.index = H_promedio.index.strftime('%Y-%m')                 # se define promedio del idice mensualmente
     dias_promedio = [17,47,75,105,135,162,198,228,258,288,318,344]        # escoge el dia promedio del mes segun tabla 1.4 de Tiwari 
     kT_mensual_t = kT_diario_t[kT_diario_t.n_dia.isin(dias_promedio)]     # la funcion .isin(), permite escoger el numero de dia que propone la tabla 1.4 de tiwari (para los promedios mensuales de Io)
-    kT_mensual_t = kT_mensual_t.filter(items=['Io (kWh/m^2)','n_dia'])    # se extrae las columnas deseadas
+    kT_mensual_t = kT_mensual_t.filter(items=['Io (kWh/m^2)','n_dia','Rb'])    # se extrae las columnas deseadas
     kT_mensual_t.index = kT_mensual_t.index.strftime('%Y-%m')             # se define promedio del idice mensualmente 
     kT_mensual_t = pd.concat([H_promedio, kT_mensual_t], axis=1)          # se concatena (H_promedio, kT_mensual_t)
     kT_mensual_t['kT'] = kT_mensual_t['GHI kWh/m^2-dia']/kT_mensual_t['Io (kWh/m^2)'] # se calcula el kT(indice de claridad mensual)
     kT_mensual_t['I_DH kWh/m^2-dia'] = kT_mensual_t['GHI kWh/m^2-dia']*(1.403 - 1.672*kT_mensual_t['kT'])  # calculo de irradiancia difusa horizontal MENSUAL
     kT_mensual_t['IB_Tiw']=kT_mensual_t['GHI kWh/m^2-dia'] - kT_mensual_t['I_DH kWh/m^2-dia']
+    kT_mensual_t['IT_Tiw']=kT_mensual_t['IB_Tiw']*kT_mensual_t['Rb'] + kT_mensual_t['I_DH kWh/m^2-dia']*Rd + Ro*Rr*kT_mensual_t['GHI kWh/m^2-dia']
+    #--------------------- ARREGLO DE FECHAS EN kT_mensual_t---------------------
+    kT_mensual_t = kT_mensual_t.reset_index()                             # resetea el indice del DataFrame
+    kT_mensual_t = kT_mensual_t.drop(['Fecha'],axis=1)                    # elimina las columnas no deseadas de la nueva base de datos
+    fecha_mes_tiw = kT_diario_t.filter(items=['n_dia'])
+    fecha_prom_MES = fecha_mes_tiw.resample('M').mean()
+    fecha_prom_MES = fecha_prom_MES.reset_index()                         # resetea el indice del DataFrame
+    fecha_prom_MES = fecha_prom_MES.drop(['n_dia'],axis=1)                # resetea el indice del DataFrame
+    kT_mensual_t = pd.concat([kT_mensual_t, fecha_prom_MES], axis=1)      # se concatena (fecha_prom_MES, kT_mensual_t)
+    kT_mensual_t = kT_mensual_t.set_index('Fecha')                        # Se fija la fecha como indice (index)
     
-    
-
     return kT_diario_t, kT_mensual_t
 
 kT_diario_t, kT_mensual_t  = kt_bdd_tiwari (GHI_diario, num_dia, kT_mensual)   
 
 
+
+#######________PROMEDIO MENSUAL DE IRRADIACION_____
+
+#Temp_prom_MES = Temp_prom_dia.resample('M').mean()
+#Temp_prom_MES.index = Temp_prom_MES.index.strftime('%Y-%m')             # se define promedio del idice mensualmente 
+#qt = q
+#qt.index = q.index.strftime('%Y-%m')  
+
+def ener_Ic_tiw ():
+    Ic_tiw = kT_mensual_t.filter(items=['IT_Tiw'])                  # filtro IT_Tiw 
+    Ic_tiw = Temp_prom_mes.Temperatura.astype(object).combine(Ic_tiw.IT_Tiw , func=Potencia)
+    Ic_tiw = Ic_tiw.to_frame()
+    Ic_tiw.columns = ['Energia prom Ic_tiw[kWh]']                 # cambio el nombre de la columna
+    Ic_tiw = pd.concat([Ic_tiw, q], axis=1)                           # se concatena todos los valores calculados
+    Ic_tiw['Energ_IC[kWh]'] = Ic_tiw['Energia prom Ic_tiw[kWh]']*Ic_tiw['dias'] # se 
+    Ic_tiw = Ic_tiw.filter(items=['Energ_IC[kWh]'])
+
+    return Ic_tiw
+
+Ic_tiw = ener_Ic_tiw ()
+    
+Energ_Ic_tiw_anio = Ic_tiw.resample('Y').sum() 
+Energ_Ic_tiw_mes = Ic_tiw.resample('M').sum()
+
+
+def graficas_IC_TIW ():
+    
+    fig, ax = plt.subplots()
+    Energ_Ic_tiw_mes.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
+    ax.set_xticklabels([x.strftime('%Y-%m') for x in Energ_Ic_tiw_mes.index], rotation=90)
+    plt.ylabel('Energía generada [kWh]', fontsize=16)
+    plt.xlabel('Fechas [meses]', fontsize=16)
+    plt.title('MÉTODO TIWARI: Energía SOLAR (SUPERFICIE INCLINADA)')
+    plt.show()
+    
+graficas_IC_TIW ()
+
+########################## COMPARACION DE LAS ENERGIAS ##################
+energias_TIWARI = pd.concat([ener_mes_horizont, Energ_Ic_tiw_mes], axis=1)
+energias_TIWARI.plot(linewidth=0.8).set_title('Comparación mensual de Energía (MÉTODO DE TIWARI)')
+plt.ylabel('Energía generada [kWh]', fontsize=16)
+    
+
+'''
+#######________DA EL MISMO RESULTADO QUE CUANDO SE USA (kT_mensual_t) _____
+ener_panel_TIW = Temp_prom_dia.Temperatura.astype(object).combine(kT_diario_t.IC , func = Potencia)
+ener_panel_TIW = ener_panel_TIW.to_frame()
+ener_panel_TIW.columns = ['Energia [kWh]'] 
+#ener_panel_incli = ener_panel_incli.resample('D').apply(integrate.trapz, dx=1/2)  #realiza la integracion diaria de la energia  ;  dx=1/2 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 30T, se debe especificar que la hora la dividimos en 2 partes de 30 minutos
+
+ener_suma_anio_tiwari_d =  ener_panel_TIW.sum()                               # cambio el nombre de la columna
+'''
+
+    
 '''
 # https://pypi.org/project/windrose/    # enlace de ejemplo
 
@@ -912,6 +1129,47 @@ ax = WindroseAxes.from_ax()
 ax.bar(wd, ws, normed=True, opening=0.8, edgecolor='white')
 ax.set_legend()
 
+'''
+#-----------------------PARA LA INTER EOLICA-------------------------------
+
+def poten_eolica_INTER (INTER_vel):
+    
+    pot_eo = spline(INTER_vel)                                          # saca los valores de potencia de las velocidaddes de viento
+    forma = pot_eo.shape[0]                                             # saca el numero de datos 
+    datos = pd.date_range(start=fecha_ini , periods=forma, freq='30T')  # saca las fechas y horas a una frecuencia de 30 minutos
+    p_eolica = pd.DataFrame(data=pot_eo, index=datos)                   # es el mismo df de (pot_eo), pero con los datos de intervalos(fechas)
+    
+    
+    return  p_eolica
+
+p_eolica = poten_eolica_INTER (INTER_vel)
+
+p_eolica.columns=['P eólica (W)']  
+p_eolica[p_eolica < 0.01] = 0
+area_eol_bdd=p_eolica.resample('D').apply(integrate.trapz, dx=1/2)   # Area bajo la curva de velocidad del viento, (energia diaria) ;   dx=1/2 porque la integracion por defecto es de 1 unidad (hora), como tenemos una frecuencia de 30T, se debe especificar que la hora la dividimos en 2 partes de 30 minutos
+area_eol_bdd['P eólica (W)'] = area_eol_bdd['P eólica (W)']/1000                         # paso a kWh/m^2-dia   
+area_eol_bdd.columns=['E_eólica_kWh'] 
+
+
+area_eol_bdd_suma_anual = area_eol_bdd.resample('Y').sum()
+area_eol_bdd_sum_mes = area_eol_bdd.resample('M').sum()
+
+
+def grafica_eolica_cronologico ():
+    
+    fig, ax = plt.subplots()
+    area_eol_bdd_sum_mes.plot(kind='bar', figsize=(12,8), color='r',edgecolor='black',  width=0.7, alpha=0.8, stacked= True, ax=ax)    #  width=0.7 es el ancho, alpha=0.8 es la opacidad, color='g' es el color de la grafica, edgecolor='black' es el color del contorno de las barras, puedo retirar los 4 argumentos
+    ax.set_xticklabels([x.strftime('%Y-%m') for x in area_eol_bdd_sum_mes.index], rotation=90)
+    plt.ylabel('Energía generada [KWh]', fontsize=16)
+    plt.xlabel('Fechas [meses]', fontsize=16)
+    plt.title('METODO: (CRONOLÓGICO) Energía Eólica mensual')
+    plt.show()
+    
+grafica_eolica_cronologico ()
+'''
+# grafica la potencia producida por el aerogenerador--- no es energia
+p_eolica_bdd = p_eolica.plot().set_title('Potencia eólica generada (MÉTODO CRONOLÓGICO)')  # Grafica de la potencia eolica generada (metodo cronologico para BDD)
+plt.ylabel('Potencia [W]', fontsize=16)
 '''
 #_______________________GRAFICAS DE ROSA DE LOS VIENTOS______________________
 
@@ -982,9 +1240,7 @@ v_prom_ANUAL = INTER_vel.resample('Y').mean()                                # p
 v_prom_ANUAL.columns=['v_prom (m/s)']                                        # cambio el nombre de la columna
 parametros = pd.concat([desviacion_std_ANUAL, v_prom_ANUAL], axis=1)         # se concatena todos los valores calculados
 parametros['k'] = (parametros['σ std']/parametros['v_prom (m/s)'])**-1.086   # se calcula el parametro k
-
 parametros['c'] = parametros['v_prom (m/s)']*(0.568+(0.433/parametros['k']))**(-1/parametros['k']) # se calcula el parametro k
-
 
 k = parametros['k'].values[0]                  # Adquiere el valor float de la FACTOR DE FORMA (k)
 c = parametros['c'].values[0]                  # Adquiere el valor float de la FACTOR DE ESCALA (c)
@@ -1003,7 +1259,6 @@ vel_array = INTER_vel.to_numpy()
 
 def weib(vel_array,c,k):
     return (k/c) * (vel_array/c)**(k - 1) * np.exp(-(vel_array/c)**k)
-
 
 
 #fdp=(k/c)*(v/c)**(k-1)*np.exp(-(v/c)**k)
@@ -1032,7 +1287,7 @@ plt.show()
 #rv= stats.exponweib(c,k).rvs(size=1000)
 
 #--------------este metodo resulta mas conveniente-----------------
-x1 = np.linspace(v_min_anual, v_max_anual, 1000)            # determina el numero de valores en el eje x para la grafica
+x1 = np.linspace(v_min_anual, v_max_anual, 1000)       # determina el numero de valores en el eje x para la grafica
 s11 = c*np.random.weibull(k, 10000)
 plt.figure()
 plt.plot(x1, weib(x1, c, k), label='Weibull')          # SE USA NUESTRA PROPIA FUNCION DE WEIBULL
@@ -1054,7 +1309,7 @@ plt.show
 
 rv= stats.exponweib(c,k).rvs(size=1000)
 plt.figure()
-plt.hist(rv, density=True, edgecolor='black',bins=20, label='GRAFICAS JUNTAS')
+plt.hist(rv, density=True, edgecolor='black',bins=20, label='Muestreo')
 plt.plot(x1,weibull)
 plt.title('Función de densidad de Weibull') # se usa la función de weibull para graficar.
 plt.xlabel('Velocidad del Viento [m/s]')
@@ -1067,12 +1322,14 @@ plt.show()
 #--------GRAFICA DE LA CURVA DE POTENCIA VS VELOCIDAD Y LA GRAFICA DE DENSIDAD DE PROBABILIDAD-----
 
 
+
 x3 = np.linspace(0, 25, 1000)                             # determina el numero de valores en el eje x para la grafica
 y3 = weib(x3, c, k)                                       # determina los valores del eje y de la segunda curva
 y4 = spline(x3)                                           # determina los valores del eje y de la primera curva
 
-fig, ax3 = plt.subplots()                                 # determina el figure y el ax el subplot()
+#########################  PRUEBA DE MULTIPLICACION  ###############
 
+fig, ax3 = plt.subplots()                                 # determina el figure y el ax el subplot()
 
 color = 'tab:red'                                         # determona el color del delineado de la funcion
 ax3.set_xlabel('Velocidad de viento (m/s)')               # nombra el eje x
@@ -1102,14 +1359,14 @@ plt.show()
 #------ajuste de la ecuacion de la curva de weibull, para la ecuacion de la curva-----
 x_weib = np.array(x3)
 y_weib = np.array(weib(x3, c, k))
-ajuste = np.polyfit(x_weib, y_weib, 10)
+ajuste = np.polyfit(x_weib, y_weib, 9)
 a = np.poly1d(ajuste)
 print(a)
 
 #------ajuste de la ecuacion de la curva de potencia velocidad, para la ecuacion de la curva-----
 x_pv = np.array(x3)
 y_pv = np.array(spline(x3))
-ajuste_pv = np.polyfit(x_pv, y_pv, 10)
+ajuste_pv = np.polyfit(x_pv, y_pv, 9)
 a_pv = np.poly1d(ajuste_pv)
 print(a_pv)
 
@@ -1117,16 +1374,13 @@ print(a_pv)
 produc_polinom = a*a_pv
 integral = np.polyint(produc_polinom)
 
+plt.plot(produc_polinom)
+plt.show()
+
 
 pot_prob2 = np.polyval(integral, vel_parada) - np.polyval(integral, vel_arranque)
 
 energia_prob_anual = pot_prob2*8760
-
-#produc_polinom = np.poly1d(produc_polinom, variable='z')
-#dz = integrate(produc_polinom, (z, 2, 25))
-
-
-
 
 
 
@@ -1135,7 +1389,6 @@ energia_prob_anual = pot_prob2*8760
 desviacion_std_MES = INTER_vel.resample('M').std() 
 
 
-    
 
 
 
@@ -1171,25 +1424,111 @@ print(a_inte)
 '''
 pot_pb = np.polyval(integ, vel_parada) - np.polyval(integ, vel_arranque)  # SI SE INTEGRA PERO NO SE PUEDE CALCULAR
 '''
-#________________________________GRAFICAS FINALES____________________________
-
-#------------------------GRAFICAS PARA EL RECURSO EOLICO---------------------
-
-v_viento_bdd = BDD_vel_v.plot().set_title('Registro de la velocidad del viento (BDD)')            # Grafica del registro de velocidad del viento (sin tratamiento de datos BDD)
-v_viento_filtrada = INTER_spl_vel.plot(linewidth=0.7).set_title('Registro de la velocidad del viento (INTERPOLADA Y FILTRADA)')  # Grafica del registro de velocidad del viento (filtrada e interpolada)
-
-p_eolica_bdd = p_eolica.plot().set_title('Potencia eólica generada (MÉTODO CRONOLÓGICO)')  # Grafica de la potencia eolica generada (metodo cronologico para BDD)
-plt.ylabel('Potencia [W]', fontsize=16)
 
 
 
+#________________________________________________________________________
+#_____________CONVULUCION DE LAS FUNCIONES_______________________________
+#v_min_anual, v_max_anual       # RANGO DE VALORES 
+#DEFINICION DE FUNCIONES
+# y3   para weibull
+# y4   curva potencia del aerogenerador
+# x1   linspace del rango entre valores minimo y maximo de velocidad del aerogenerador
+
+#y_weib = np.array(y3)   # ya son array no se necesita transformar
+#y_curvap = np.array(y4)
+
+#   definicion de funciones
+'''
+def weib(vel_array,c,k):
+    return (k/c) * (vel_array/c)**(k - 1) * np.exp(-(vel_array/c)**k)
+'''
+#f1 = lambda x3: np.y3
+#g = lambda x3: np.y4
+
+#weib(vel_array,c,k)
+
+#vel_arranque, vel_parada
+'''
+x5 = np.linspace(vel_arranque, vel_parada, 1000) 
+
+conv = []
+for xx in x5:
+        xp = np.linspace(0, xx, 100)
+        h = weib(xp,c,k)*spline(xx-xp) #spline(x5)
+        I = simps(h, xp)
+        conv.append(I)
+        #plt.plot(spline(xx-xp), label='spline')
+        #plt.plot(weib(xp,c,k), label='weib')
 
 
+plt.plot(x5, conv, label='convolucion')
+
+xr = np.linspace(vel_arranque, vel_parada, 1000)
+plt.plot(xr,weib(xr,c,k), label = 'funcion weibull')
+plt.plot(xr,spline(x5), label = 'funcion potencia')
+plt.show()
+'''
+x5 = np.linspace(vel_arranque, vel_parada, 1000) 
+
+conv = []
+for xx in x5:
+        xp = np.linspace(0, xx, 100)
+        h = weib(xx-xp,c,k)*spline(xp) #spline(x5)
+        I = simps(h, xp)
+        conv.append(I)
+        #plt.plot(spline(xp), label='spline')
+        #plt.plot(weib(xx-xp,c,k), label='weib')
+        #plt.plot(conv, label='convolucion')
+        #plt.show()
+
+
+plt.plot(conv, label='convolucion')
+plt.show()
+'''
+xr = np.linspace(vel_arranque, vel_parada, 1000)
+plt.plot(xr,weib(xr,c,k), label = 'funcion weibull')
+plt.plot(xr,spline(x5), label = 'funcion potencia')
+plt.show()
+'''
+
+'''
+prob_energ_conv = pd.DataFrame(I)
+prob_energ_conv_sum = prob_energ_conv.sum()
+'''
+#ener_conv = I.to_frame()
+#ener_conv = ener_conv.sum()
+#plt.plot(f, xp, label='convolucion')
+#plt.show()
+#ener_conv = pd.DataFrame(I, columns = ['energia'])
+#ener_conv = ener_conv.sum()
+
+
+plt.plot(conv)
+plt.show()
+
+
+
+'''
+conv = []
+for xx in x3:
+        xp = np.linspace(0, xx, 100)
+        h = weib(xp)*g(xx-xp)
+        I = simps(h, xp)
+        conv.append(I)
+
+plt.plot(x3, conv, label='convolucion')
+plt.show()
+
+
+plt.plot(f, xp, label='convolucion')
+plt.show()
+'''
 #-----------------------------MENÚ PRINCIPAL---------------------------------
 ##--------- creacion de menu y submenu con tkinter --------------------------
 ventana=tk.Tk()                                       #creacion de la ventana
 ventana.title('Evaluación de Recurso Solar y Eólico') #titulo de la ventana
-ventana.geometry('600x300')                           #tamaño de la ventana 600x300
+ventana.geometry('600x300')                           #tamanio de la ventana 600x300
 ventana.iconbitmap('BUHO_EPN_big.ico')                #ingreso del icono en la ventana
 fondo=ImageTk.PhotoImage(Image.open ('energías-renovables-5.jpg').resize((600, 400)))   # para fondo de ventana
 fondo1=Label(image=fondo)                             
@@ -1197,13 +1536,11 @@ fondo1.pack()
 
 mi_menu=tk.Menu(ventana)                              #creacion de menu en la ventana con una nueva variable 'mi_menu'
 
-##------------------------inicio menu solar-----------------------------------------
+##------------------------menu solar-----------------------------------------
 menu_solar=tk.Menu(mi_menu, tearoff=0)                                  #creacion de sub-menu en la ventana con la nueva variable 'mi_menu'.....tearoff=0 sirve para corregir error del submenu
 menu_solar.add_command(label='Método de Masters',command=f_masters)     #Opciones del menú
 menu_solar.add_command(label='Método de Tiwari', command=f_tiwari)      #Opciones del menú
 mi_menu.add_cascade(label='Evaluación solar', menu=menu_solar)          #nombre de la opcion principal para sub-menu
-##------------------------fin menu solar-----------------------------------------
-
 
 #-------------------------menu eólico----------------------------------------
 menu_eolico=tk.Menu(mi_menu, tearoff=0)                                      #creacion de sub-menu en la ventana con la nueva variable 'mi_menu'.....tearoff=0 sirve para corregir error del submenu
